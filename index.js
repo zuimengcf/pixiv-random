@@ -1,12 +1,14 @@
 const express = require("express");
+const axios = require("axios");
 const app = express();
 
-app.get("/", (req, res) => {
-  // 随机 ID (0-1000)
-  const id = Math.floor(Math.random() * 1000);
-  const w = req.query.w || 800;
-  const h = req.query.h || 600;
-  res.redirect(`https://picsum.photos/id/${id}/${w}/${h}`);
+app.get("/", async (req, res) => {
+  try {
+    const r = await axios.get("https://dog.ceo/api/breeds/image/random");
+    res.redirect(r.data.message);
+  } catch {
+    res.redirect("https://images.dog.ceo/breeds/greyhound-indian/rampur-greyhound.jpg");
+  }
 });
 
 module.exports = app;
