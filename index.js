@@ -4,10 +4,17 @@ const app = express();
 
 app.get("/", async (req, res) => {
   try {
-    const r = await axios.get("https://dog.ceo/api/breeds/image/random");
-    res.redirect(r.data.message);
-  } catch {
-    res.redirect("https://images.dog.ceo/breeds/greyhound-indian/rampur-greyhound.jpg");
+    // Yande.re 随机获取一张图片
+    const r = await axios.get("https://yande.re/post.json?limit=1&tags=rating:safe order:random", {timeout: 10000});
+    if (r.data && r.data[0]) {
+      // 使用预览图或原图
+      const imgUrl = r.data[0].preview_url || r.data[0].file_url;
+      res.redirect(imgUrl);
+    } else {
+      res.status(404).send("No image found");
+    }
+  } catch (e) {
+    res.status(500).send("Error: " + e.message);
   }
 });
 
