@@ -40,10 +40,16 @@ app.get("/json", async (req, res) => {
   catch (e) { res.status(500).json({error: e.message}); }
 });
 
-// 重定向到图片
+// 直接返回图片
 app.get("/img", async (req, res) => {
-  try { res.redirect((await getImage()).proxy); }
-  catch (e) { res.status(500).send("Error: " + e.message); }
+  try {
+    const img = await getImage();
+    const imgUrl = Buffer.from(req.params?.encoded ? req.params.encoded : img.url, "base64url").toString("utf-8") || img.url;
+    const r = await axios.get(img.url, {responseType: "stream", timeout: 30000});
+    res.set("Content-Type", r.headers["content-type"] || "image/jpeg");
+    res.set("Cache-Control", "public, max-age=86400");
+    r.data.pipe(res);
+  } catch (e) { res.status(500).send("Error: " + e.message); }
 });
 
 // 代理图片
